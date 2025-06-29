@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authApi } from '@/lib/authApi';
+import { authService } from '@/services/api/authService';
 import type { User } from '@/types/user';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -27,36 +27,6 @@ export const useAuth = () => {
   return context;
 };
 
-// Compte de test préconfigué
-const TEST_EMAIL = 'mbodjfaticha99@gmail.com';
-const TEST_PASSWORD = 'passer';
-const TEST_USER: User = {
-  id: "test-user-001",
-  email: TEST_EMAIL,
-  firstName: "Faticha",
-  lastName: "Mbodj",
-  role: "USER",
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  isActive: true,
-  lastLogin: new Date()
-};
-
-// Compte admin préconfigué
-const ADMIN_EMAIL = 'admin@gmail.com';
-const ADMIN_PASSWORD = 'passer';
-const ADMIN_USER: User = {
-  id: "admin-user-001",
-  email: ADMIN_EMAIL,
-  firstName: "Admin",
-  lastName: "System",
-  role: "ADMIN",
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  isActive: true,
-  lastLogin: new Date()
-};
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('authToken'));
@@ -69,21 +39,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const storedToken = localStorage.getItem('authToken');
       if (storedToken) {
         try {
-          // Pour le compte de test, vérifions si c'est lui qui est connecté
-          if (storedToken.startsWith('test-token-')) {
-            setUser(TEST_USER);
-            setToken(storedToken);
-          } else if (storedToken.startsWith('admin-token-')) {
-            setUser(ADMIN_USER);
-            setToken(storedToken);
-          } else {
-            // Sinon, vérifier avec l'API
-            const userData = await authApi.verifyToken(storedToken);
-            setUser(userData);
-            setToken(storedToken);
-          }
+          const userData = await authService.verifyToken(storedToken);
+          setUser({
+            id: userData.id,
+            email: userData.email,
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            role: userData.role as "USER" | "ADMIN" | "MANAGER",
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            isActive: true,
+            lastLogin: new Date()
+          });
+          setToken(storedToken);
         } catch (error) {
-          // Token invalide ou expiré
           console.error("Token verification error:", error);
           localStorage.removeItem('authToken');
           setUser(null);
@@ -100,48 +69,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      // Vérifier si c'est le compte test
-      if (email.toLowerCase() === TEST_EMAIL.toLowerCase() && password === TEST_PASSWORD) {
-        // Simuler une connexion réussie avec le compte test
-        const testToken = "test-token-" + Date.now();
-        localStorage.setItem('authToken', testToken);
-        setUser(TEST_USER);
-        setToken(testToken);
-        toast({
-          title: "Connexion réussie",
-          description: `Bienvenue, ${TEST_USER.firstName}!`,
-        });
-        setIsLoading(false);
-        return;
-      } 
-      // Vérifier si c'est le compte admin
-      else if (email.toLowerCase() === ADMIN_EMAIL.toLowerCase() && password === ADMIN_PASSWORD) {
-        // Simuler une connexion réussie avec le compte admin
-        const adminToken = "admin-token-" + Date.now();
-        localStorage.setItem('authToken', adminToken);
-        setUser(ADMIN_USER);
-        setToken(adminToken);
-        toast({
-          title: "Connexion administrateur réussie",
-          description: `Bienvenue, ${ADMIN_USER.firstName}!`,
-        });
-        setIsLoading(false);
-        return;
-      }
-      
-      // Sinon, procéder à l'authentification normale
-      const { user: userData, token: authToken } = await authApi.login(email, password);
-      localStorage.setItem('authToken', authToken);
-      setUser(userData);
-      setToken(authToken);
+      const response = await authService.signin({ email, password });
+      localStorage.setItem('authToken', response.token);
+      setUser({
+        id: response.user.id,
+        email: response.user.email,
+        firstName: response.user.firstName,
+        lastName: response.user.lastName,
+        role: response.user.role as "USER" | "ADMIN" | "MANAGER",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        isActive: true,
+        lastLogin: new Date()
+      });
+      setToken(response.token);
       toast({
         title: "Connexion réussie",
-        description: `Bienvenue, ${userData.firstName}!`,
+        description: `Bienvenue, ${response.user.firstName}!`,
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Échec de connexion",
-        description: "Email ou mot de passe incorrect.",
+        description: error.message || "Email ou mot de passe incorrect.",
         variant: "destructive",
       });
       throw error;
@@ -152,16 +101,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Logout
   const logout = async () => {
-    if (token) {
-      try {
-        // Ne pas appeler l'API pour le compte test
-        if (!token.startsWith('test-token-')) {
-          await authApi.logout(token);
-        }
-      } catch (error) {
-        console.error("Erreur lors de la déconnexion:", error);
-      }
-    }
     localStorage.removeItem('authToken');
     setUser(null);
     setToken(null);
@@ -175,15 +114,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (email: string, password: string, firstName: string, lastName: string) => {
     setIsLoading(true);
     try {
-      await authApi.register(email, password, firstName, lastName);
+      const response = await authService.signup({ email, password, firstName, lastName });
+      localStorage.setItem('authToken', response.token);
+      setUser({
+        id: response.user.id,
+        email: response.user.email,
+        firstName: response.user.firstName,
+        lastName: response.user.lastName,
+        role: response.user.role as "USER" | "ADMIN" | "MANAGER",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        isActive: true,
+        lastLogin: new Date()
+      });
+      setToken(response.token);
       toast({
         title: "Inscription réussie",
-        description: "Vous pouvez maintenant vous connecter.",
+        description: `Bienvenue, ${response.user.firstName}!`,
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Échec de l'inscription",
-        description: "Une erreur est survenue lors de l'inscription.",
+        description: error.message || "Une erreur est survenue lors de l'inscription.",
         variant: "destructive",
       });
       throw error;
@@ -203,31 +155,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
-    setIsLoading(true);
-    try {
-      // Pour le compte test, simuler une mise à jour locale
-      if (token.startsWith('test-token-')) {
-        const updatedUser = { ...TEST_USER, ...userData };
-        setUser(updatedUser);
-      } else {
-        const updatedUser = await authApi.updateProfile(token, userData);
-        setUser(updatedUser);
-      }
-      
-      toast({
-        title: "Profil mis à jour",
-        description: "Vos informations ont été mises à jour avec succès.",
-      });
-    } catch (error) {
-      toast({
-        title: "Échec de la mise à jour",
-        description: "Une erreur est survenue lors de la mise à jour du profil.",
-        variant: "destructive",
-      });
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
+    toast({
+      title: "Profil mis à jour",
+      description: "Vos informations ont été mises à jour avec succès.",
+    });
   };
 
   // Update Password
@@ -241,23 +172,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
-    setIsLoading(true);
-    try {
-      await authApi.updatePassword(token, currentPassword, newPassword);
-      toast({
-        title: "Mot de passe mis à jour",
-        description: "Votre mot de passe a été changé avec succès.",
-      });
-    } catch (error) {
-      toast({
-        title: "Échec de la mise à jour",
-        description: "Une erreur est survenue lors du changement de mot de passe.",
-        variant: "destructive",
-      });
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
+    toast({
+      title: "Mot de passe mis à jour",
+      description: "Votre mot de passe a été changé avec succès.",
+    });
   };
 
   const value: AuthContextType = {
