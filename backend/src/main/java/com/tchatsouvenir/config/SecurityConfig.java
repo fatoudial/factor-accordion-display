@@ -1,4 +1,3 @@
-
 package com.tchatsouvenir.config;
 
 import org.springframework.context.annotation.Bean;
@@ -21,12 +20,17 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.cors().and().csrf().disable()
-            .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/api/**").permitAll()
-                .requestMatchers("/h2-console/**").permitAll()
-                .anyRequest().authenticated()
-            )
-            .headers(headers -> headers.frameOptions().disable());
+                .authorizeHttpRequests(authz -> authz
+                        .requestMatchers(
+                                "/api/**",
+                                "/h2-console/**",
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**"
+                        ).permitAll()
+                        .anyRequest().authenticated()
+                )
+                .headers(headers -> headers.frameOptions().disable());
 
         return http.build();
     }

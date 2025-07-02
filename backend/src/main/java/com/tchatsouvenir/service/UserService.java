@@ -5,13 +5,16 @@ import com.tchatsouvenir.model.User;
 import com.tchatsouvenir.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
     
     @Autowired
     private UserRepository userRepository;
@@ -57,5 +60,23 @@ public class UserService {
             return userRepository.save(user);
         }
         throw new RuntimeException("Utilisateur non trouvé avec l'email: " + email);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            return org.springframework.security.core.userdetails.User.builder()
+                    .username(user.getEmail())
+                    .password(user.getPassword())
+                    .authorities("ROLE_" + user.getRole().name())
+                    .accountExpired(false)
+                    .accountLocked(false)
+                    .credentialsExpired(false)
+                    .disabled(!user.getIsActive())
+                    .build();
+        }
+        throw new UsernameNotFoundException("Utilisateur non trouvé avec l'email: " + email);
     }
 }
