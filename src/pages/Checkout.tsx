@@ -10,7 +10,7 @@ import { useToast } from '@/components/ui/use-toast';
 import OrderSummary from '@/components/checkout/OrderSummary';
 import ShippingForm from '@/components/checkout/ShippingForm';
 import PaymentSimulator from '@/components/payment/PaymentSimulator';
-import PaymentOptions from '@/components/payment/PaymentOptions';
+import PaymentProcessor from '@/components/payment/PaymentProcessor';
 import { booksApi } from '@/lib/api';
 import { BookFormat } from '@/types/book';
 
@@ -217,11 +217,13 @@ const Checkout = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <PaymentSimulator 
+                  <PaymentProcessor 
                     amount={bookInfo.price} 
-                    bookId={bookInfo.id}
-                    bookTitle={bookInfo.title}
-                    onSuccess={handleNextStep}
+                    orderId={bookInfo.id}
+                    onSuccess={(transactionId) => {
+                      console.log('Payment success:', transactionId);
+                      handleNextStep();
+                    }}
                     onCancel={handlePreviousStep}
                   />
                 </CardContent>

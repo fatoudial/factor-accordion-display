@@ -29,6 +29,7 @@ export interface BackendPaymentResponse {
   message: string;
   amount?: number;
   completedAt?: string;
+  payment_url?: string;
 }
 
 export interface PaymentHistory {
