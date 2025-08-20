@@ -1,4 +1,4 @@
-
+// OrderSummary Component - Export fixed
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { MapPin } from "lucide-react";
