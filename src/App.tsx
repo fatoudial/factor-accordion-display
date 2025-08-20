@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
+import { BackendAuthProvider } from "@/context/BackendAuthContext";
 import { CartProvider } from "@/context/CartContext";
 import { LanguageProvider } from "@/context/LanguageContext";
 import Index from "./pages/Index";
@@ -54,6 +55,7 @@ import InstagramBookInterface from "./components/InstagramBookInterface";
 import FacebookBookInterface from "./components/FacebookInterface";
 import WhatsAppBookInterface from "./components/WhatsAppBookInterface";
 import TestAuth from "./pages/TestAuth";
+import BackendTestPayment from "./pages/BackendTestPayment";
 
 const queryClient = new QueryClient();
 
@@ -61,7 +63,8 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <LanguageProvider>
       <AuthProvider>
-        <CartProvider>
+        <BackendAuthProvider>
+          <CartProvider>
           <TooltipProvider>
           <Toaster />
           <Sonner />
@@ -93,6 +96,7 @@ const App = () => (
                 <Route path="/extractor" element={<ExtractorTool />} />
                 <Route path="/mock-orders" element={<MockOrders />} />
                 <Route path="/test-auth" element={<TestAuth />} />
+                <Route path="/test-backend-payment" element={<BackendTestPayment />} />
 
                 {/* Routes temporairement publiques - authentification désactivée */}
                 <Route path="/dashboard" element={<Dashboard />} />
@@ -123,8 +127,9 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
-        </TooltipProvider>
-      </CartProvider>
+         </TooltipProvider>
+       </CartProvider>
+     </BackendAuthProvider>
     </AuthProvider>
     </LanguageProvider>
   </QueryClientProvider>
