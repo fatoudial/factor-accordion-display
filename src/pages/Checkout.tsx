@@ -4,8 +4,8 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckoutButton } from '@/components/payment/PaymentSimulator';
-import { ShippingForm } from '@/components/checkout/ShippingForm';
-import { OrderSummary } from '@/components/checkout/OrderSummary';
+import ShippingForm from '@/components/checkout/ShippingForm';
+import OrderSummary from '@/components/checkout/OrderSummary';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { paymentService } from '@/lib/paymentService';
@@ -18,7 +18,7 @@ const Checkout = () => {
   const [shippingAddress, setShippingAddress] = useState({});
   const [paymentStep, setPaymentStep] = useState<'shipping' | 'payment' | 'success' | 'error'>('shipping');
   const [orderResult, setOrderResult] = useState<any>(null);
-  const { cartItems, total, clearCart } = useCart();
+  const { items: cartItems, total, clearCart } = useCart();
   const { user } = useAuth();
 
   // Check for payment result on component mount
