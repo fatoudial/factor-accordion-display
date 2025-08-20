@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import type { Order } from "@/types/order";
 
 const UserOrders = () => {
-  const { token } = useAuth();
+  const { session } = useAuth();
   const { toast } = useToast();
   const [orders, setOrders] = useState<Order[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
@@ -21,10 +21,10 @@ const UserOrders = () => {
 
   useEffect(() => {
     const fetchOrders = async () => {
-      if (!token) return;
+      if (!session) return;
       
       try {
-        const data = await orderApi.getUserOrders(token);
+        const data = await orderApi.getUserOrders(session.access_token);
         setOrders(data);
         setFilteredOrders(data);
       } catch (error) {
@@ -40,7 +40,7 @@ const UserOrders = () => {
     };
 
     fetchOrders();
-  }, [token, toast]);
+  }, [session, toast]);
 
   useEffect(() => {
     if (searchQuery) {

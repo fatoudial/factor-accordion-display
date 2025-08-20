@@ -31,7 +31,9 @@ export const authApi = {
         throw new Error(`Erreur ${response.status}: ${response.statusText}`);
       }
 
-      return await response.json();
+      const authResponse = await response.json();
+      // Retourner seulement les infos utilisateur pour l'inscription
+      return authResponse.user;
     } catch (error: any) {
       return handleApiError(error);
     }
@@ -52,7 +54,12 @@ export const authApi = {
         throw new Error(`Erreur ${response.status}: ${response.statusText}`);
       }
 
-      return await response.json();
+      const authResponse = await response.json();
+      // Adapter la réponse du backend pour correspondre à ce que le frontend attend
+      return {
+        user: authResponse.user,
+        token: authResponse.token
+      };
     } catch (error: any) {
       return handleApiError(error);
     }

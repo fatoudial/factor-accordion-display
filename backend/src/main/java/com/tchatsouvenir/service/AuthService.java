@@ -4,6 +4,8 @@ package com.tchatsouvenir.service;
 import com.tchatsouvenir.dto.AuthResponse;
 import com.tchatsouvenir.dto.LoginRequest;
 import com.tchatsouvenir.dto.RegisterRequest;
+import com.tchatsouvenir.dto.UpdatePasswordRequest;
+import com.tchatsouvenir.dto.UpdateProfileRequest;
 import com.tchatsouvenir.model.User;
 import com.tchatsouvenir.model.Role;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -147,6 +149,57 @@ public class AuthService {
                 .email(user.getEmail())
                 .firstName(user.getName().split(" ")[0])
                 .lastName(user.getName().contains(" ") ? user.getName().split(" ")[1] : "")
+                .role(user.getRole().toString())
+                .build();
+    }
+
+    public AuthResponse.UserInfo updatePassword(String token, String currentPassword, String newPassword) {
+        String email = jwtService.extractUsername(token);
+        User user = userService.getUserByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+        // Vérifier l'ancien mot de passe
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new RuntimeException("Mot de passe actuel incorrect");
+        }
+
+        // Mettre à jour le mot de passe
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userService.updateUser(user);
+
+        return AuthResponse.UserInfo.builder()
+                .id(user.getId().toString())
+                .email(user.getEmail())
+                .firstName(user.getName().split(" ")[0])
+                .lastName(user.getName().contains(" ") ? user.getName().split(" ")[1] : "")
+                .role(user.getRole().toString())
+                .build();
+    }
+
+    public AuthResponse.UserInfo updateProfile(String token, UpdateProfileRequest request) {
+        String email = jwtService.extractUsername(token);
+        User user = userService.getUserByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+        // Mettre à jour les informations
+        if (request.getFirstName() != null && request.getLastName() != null) {
+            user.setName(request.getFirstName() + " " + request.getLastName());
+        }
+        if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
+            // Vérifier si l'email n'est pas déjà utilisé
+            if (userService.existsByEmail(request.getEmail())) {
+                throw new RuntimeException("Email déjà utilisé par un autre utilisateur");
+            }
+            user.setEmail(request.getEmail());
+        }
+
+        userService.updateUser(user);
+
+        return AuthResponse.UserInfo.builder()
+                .id(user.getId().toString())
+                .email(user.getEmail())
+                .firstName(request.getFirstName() != null ? request.getFirstName() : user.getName().split(" ")[0])
+                .lastName(request.getLastName() != null ? request.getLastName() : (user.getName().contains(" ") ? user.getName().split(" ")[1] : ""))
                 .role(user.getRole().toString())
                 .build();
     }

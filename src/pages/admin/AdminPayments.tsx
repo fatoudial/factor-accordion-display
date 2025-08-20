@@ -17,7 +17,7 @@ import NavigationBackButton from "@/components/NavigationBackButton";
 import { useLanguage } from "@/context/LanguageContext";
 
 const AdminPayments = () => {
-  const { token } = useAuth();
+  const { session } = useAuth();
   const [transactions, setTransactions] = useState<TransactionHistory[]>([]);
   const [filteredTransactions, setFilteredTransactions] = useState<TransactionHistory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -127,10 +127,10 @@ const AdminPayments = () => {
 
   useEffect(() => {
     const fetchTransactions = async () => {
-      if (!token) return;
+      if (!session) return;
       
       try {
-        const data = await paymentApi.getPaymentHistory(token);
+        const data = await paymentApi.getPaymentHistory(session.access_token);
         setTransactions(data);
         setFilteredTransactions(data);
       } catch (err: any) {
@@ -142,7 +142,7 @@ const AdminPayments = () => {
     };
 
     fetchTransactions();
-  }, [token]);
+  }, [session]);
 
   useEffect(() => {
     let result = transactions;
@@ -169,11 +169,11 @@ const AdminPayments = () => {
   }, [transactions, searchTerm, statusFilter, methodFilter]);
 
   const handleApproveTransaction = async (transactionId: string) => {
-    if (!token) return;
+    if (!session) return;
     
     setIsUpdating(true);
     try {
-      await paymentApi.approveTransaction(token, transactionId);
+      await paymentApi.approveTransaction(session.access_token, transactionId);
       
       // Mettre à jour le statut dans l'interface
       setTransactions(prevTransactions => 
@@ -200,11 +200,11 @@ const AdminPayments = () => {
   };
 
   const handleRejectTransaction = async (transactionId: string) => {
-    if (!token) return;
+    if (!session) return;
     
     setIsUpdating(true);
     try {
-      await paymentApi.rejectTransaction(token, transactionId, "Rejeté par l'administrateur");
+      await paymentApi.rejectTransaction(session.access_token, transactionId, "Rejeté par l'administrateur");
       
       // Mettre à jour le statut dans l'interface
       setTransactions(prevTransactions => 

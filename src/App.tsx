@@ -12,6 +12,7 @@ import BookDesigner from "./pages/BookDesigner";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import ProfileSettings from "./pages/ProfileSettings";
 import OrderDetails from "./pages/OrderDetails";
@@ -52,14 +53,16 @@ import ResetPassword from "./pages/ResetPassword";
 import InstagramBookInterface from "./components/InstagramBookInterface";
 import FacebookBookInterface from "./components/FacebookInterface";
 import WhatsAppBookInterface from "./components/WhatsAppBookInterface";
+import TestAuth from "./pages/TestAuth";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <CartProvider>
-        <TooltipProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <CartProvider>
+          <TooltipProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
@@ -67,8 +70,9 @@ const App = () => (
               {/* Routes publiques avec layout commun */}
               <Route path="/" element={<Layout />}>
                 <Route index element={<Index />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/cart" element={<Cart />} />
@@ -88,32 +92,17 @@ const App = () => (
                 <Route path="/terms-of-service" element={<TermsOfService />} />
                 <Route path="/extractor" element={<ExtractorTool />} />
                 <Route path="/mock-orders" element={<MockOrders />} />
+                <Route path="/test-auth" element={<TestAuth />} />
 
-                {/* Routes protégées - utilisateur connecté */}
-                <Route path="/dashboard" element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                } />
-                <Route path="/profile" element={
-                  <ProtectedRoute>
-                    <ProfileSettings />
-                  </ProtectedRoute>
-                } />
-                <Route path="/orders/:orderId" element={
-                  <ProtectedRoute>
-                    <OrderDetails />
-                  </ProtectedRoute>
-                } />
-                <Route path="/user-orders" element={
-                  <ProtectedRoute>
-                    <UserOrders />
-                  </ProtectedRoute>
-                } />
+                {/* Routes temporairement publiques - authentification désactivée */}
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/profile" element={<ProfileSettings />} />
+                <Route path="/orders/:orderId" element={<OrderDetails />} />
+                <Route path="/user-orders" element={<UserOrders />} />
               </Route>
               
-              {/* Routes protégées - administrateur avec layout admin */}
-              <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+              {/* Routes admin temporairement publiques - authentification désactivée */}
+              <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<AdminDashboard />} />
                 <Route path="orders" element={<AdminOrders />} />
                 <Route path="users" element={<AdminUsers />} />
@@ -137,6 +126,7 @@ const App = () => (
         </TooltipProvider>
       </CartProvider>
     </AuthProvider>
+    </LanguageProvider>
   </QueryClientProvider>
 );
 

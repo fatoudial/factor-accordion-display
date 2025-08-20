@@ -121,7 +121,7 @@ const userApi = {
 };
 
 const AdminUsers = () => {
-  const { token } = useAuth();
+  const { session } = useAuth();
   const { toast } = useToast();
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
@@ -137,10 +137,10 @@ const AdminUsers = () => {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      if (!token) return;
+      if (!session) return;
       
       try {
-        const data = await userApi.getAllUsers(token);
+        const data = await userApi.getAllUsers(session.access_token);
         setUsers(data);
         setFilteredUsers(data);
       } catch (err: any) {
@@ -152,7 +152,7 @@ const AdminUsers = () => {
     };
 
     fetchUsers();
-  }, [token]);
+  }, [session]);
 
   useEffect(() => {
     let result = users;
@@ -178,11 +178,11 @@ const AdminUsers = () => {
   }, [users, searchTerm, roleFilter, statusFilter]);
 
   const handleUpdateRole = async () => {
-    if (!token || !selectedUser || !newRole) return;
+    if (!session || !selectedUser || !newRole) return;
     
     setIsUpdating(true);
     try {
-      const updatedUser = await userApi.updateUserRole(token, selectedUser.id, newRole);
+      const updatedUser = await userApi.updateUserRole(session.access_token, selectedUser.id, newRole);
       
       setUsers(prevUsers => 
         prevUsers.map(user => 
@@ -210,10 +210,10 @@ const AdminUsers = () => {
   };
 
   const handleToggleStatus = async (user: User) => {
-    if (!token) return;
+    if (!session) return;
     
     try {
-      const updatedUser = await userApi.updateUserStatus(token, user.id, !user.isActive);
+      const updatedUser = await userApi.updateUserStatus(session.access_token, user.id, !user.isActive);
       
       setUsers(prevUsers => 
         prevUsers.map(u => 

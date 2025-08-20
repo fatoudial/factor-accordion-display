@@ -95,8 +95,8 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ onLogout }) => {
       {user && (
         <div className="px-4 py-3 bg-gray-800/50 border-y border-gray-700">
           <p className="text-sm font-medium">Connecté en tant que :</p>
-          <p className="text-sm font-bold">{user.firstName} {user.lastName}</p>
-          <p className="text-xs text-gray-400">{user.email}</p>
+          <p className="text-sm font-bold">{user.email}</p>
+          <p className="text-xs text-gray-400">Administrateur</p>
           <p className="text-xs mt-1 bg-red-500/20 text-red-300 px-2 py-0.5 rounded inline-flex items-center">
             <AlertCircle className="h-3 w-3 mr-1" />
             Mode administrateur

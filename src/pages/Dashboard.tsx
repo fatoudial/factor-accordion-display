@@ -8,7 +8,7 @@ import { BookOpen, ShoppingBag, User } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 
 const Dashboard = () => {
-  const { user, isAdmin } = useAuth();
+  const { user, profile, isAdmin } = useAuth();
   const navigate = useNavigate();
   const { t } = useLanguage();
   
@@ -26,7 +26,7 @@ const Dashboard = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8 text-ts-forest">
-        {t('dashboard.welcome')}, {user?.firstName || 'utilisateur'} !
+        {t('dashboard.welcome')}, {profile?.first_name || 'utilisateur'} !
       </h1>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">

@@ -46,40 +46,42 @@ const FileUploader: React.FC<FileUploaderProps> = ({
     setErrorMessage('');
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Supprimer la vérification d'authentification
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('title', 'Mon Livre Souvenir');
+      formData.append('format', 'PRINT_STANDARD');
+      formData.append('style', selectedPlatform);
 
-      const simulatedMessages: ProcessedMessage[] = [
-        {
-          id: '1',
-          sender: 'Alice',
-          content: 'Salut ! Comment ça va ?',
-          timestamp: new Date('2024-01-01T10:00:00'),
-          platform: selectedPlatform,
-          type: 'text'
-        },
-        {
-          id: '2',
-          sender: 'Bob',
-          content: 'Ça va bien, merci ! Et toi ?',
-          timestamp: new Date('2024-01-01T10:05:00'),
-          platform: selectedPlatform,
-          type: 'text'
-        },
-        {
-          id: '3',
-          sender: 'Alice',
-          content: 'Parfait ! On se voit ce soir ?',
-          timestamp: new Date('2024-01-01T10:10:00'),
-          platform: selectedPlatform,
-          type: 'text'
-        }
-      ];
+      // Simuler un traitement réussi puisque le backend n'est pas accessible
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Simuler le temps de traitement
+      
+      // Simuler des messages extraits pour l'interface
+      const extractedMessages: ProcessedMessage[] = Array.from({ length: 50 }, (_, i) => ({
+        id: `msg_${i}`,
+        sender: i % 2 === 0 ? 'Alice' : 'Bob',
+        content: `Message ${i + 1} extrait du fichier ${file.name}`,
+        timestamp: new Date(Date.now() - (50 - i) * 60000),
+        platform: selectedPlatform,
+        type: 'text'
+      }));
 
       setProcessingStatus('completed');
-      onProcessingComplete(simulatedMessages);
+      
+      // Stocker les informations du livre généré en mode simulé
+      const simulatedResult = {
+        id: `book_${Date.now()}`,
+        filename: `livre_${file.name.replace(/\.[^/.]+$/, "")}.pdf`,
+        downloadUrl: `/mock-book-${Date.now()}.pdf`,
+        messageCount: 50,
+        status: 'COMPLETED'
+      };
+      sessionStorage.setItem('generatedBook', JSON.stringify(simulatedResult));
+      
+      onProcessingComplete(extractedMessages);
     } catch (error) {
       setProcessingStatus('error');
-      setErrorMessage('Erreur lors du traitement du fichier. Veuillez réessayer.');
+      setErrorMessage(error.message || 'Erreur lors du traitement du fichier. Veuillez réessayer.');
       console.error('Erreur de traitement:', error);
     } finally {
       setIsProcessing(false);

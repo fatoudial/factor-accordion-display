@@ -30,7 +30,7 @@ interface Transaction {
 }
 
 const AdminTransactions = () => {
-  const { token } = useAuth();
+  const { session } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);

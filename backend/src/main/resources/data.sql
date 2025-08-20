@@ -2,7 +2,8 @@
 -- Données de test pour le développement
 INSERT INTO users (email, name, password, role, created_at, is_active) VALUES
 ('admin@tchatsouvenir.com', 'Admin User', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.', 'ADMIN', NOW(), true),
-('user@example.com', 'John Doe', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.', 'USER', NOW(), true);
+('user@example.com', 'John Doe', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.', 'USER', NOW(), true),
+('mbodjfaticha99@gmail.com', 'Fatima Test', '$2a$10$E2nQiCCVl4y2HJA5YFCJgeC.p3W8pjJcv1Ld0RKbBpMa7PqMyf7I6', 'USER', NOW(), true);
 
 -- Commandes de test
 INSERT INTO orders (order_reference, user_id, total_amount, status, payment_method, book_format, created_at, updated_at, first_name, last_name, address, city, postal_code, country) VALUES

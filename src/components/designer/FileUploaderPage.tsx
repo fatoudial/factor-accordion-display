@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import BookCreationStatus from '@/components/designer/BookCreationStatus';
 import NavigationBackButton from '@/components/NavigationBackButton';
+import BookDownloadManager from '@/components/admin/BookDownloadManager';
 import { ProcessedMessage } from '@/components/extractor/types';
 
 interface FileUploaderTabProps {
@@ -81,12 +82,14 @@ const FileUploaderPage: React.FC<FileUploaderTabProps> = ({ onNext }) => {
               selectedPlatform="whatsapp"
               onProcessingComplete={handleMessagesProcessed}
             />
-          ) : (
+          ) : creationStatus === "processing" ? (
             <BookCreationStatus 
               stage={creationStatus} 
               messageCount={messageCount}
               progress={progress}
             />
+          ) : (
+            <BookDownloadManager />
           )}
         </CardContent>
       </Card>

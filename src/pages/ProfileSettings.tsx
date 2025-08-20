@@ -12,12 +12,12 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/LanguageContext";
 
 const ProfileSettings = () => {
-  const { user, updateProfile, updatePassword, isLoading } = useAuth();
+  const { user, profile, updateProfile, isLoading } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
   
-  const [firstName, setFirstName] = useState(user?.firstName || "");
-  const [lastName, setLastName] = useState(user?.lastName || "");
+  const [firstName, setFirstName] = useState(profile?.first_name || "");
+  const [lastName, setLastName] = useState(profile?.last_name || "");
   const [email, setEmail] = useState(user?.email || "");
   
   const [currentPassword, setCurrentPassword] = useState("");
@@ -32,7 +32,7 @@ const ProfileSettings = () => {
     setIsUpdating(true);
     
     try {
-      await updateProfile({ firstName, lastName, email });
+      await updateProfile({ first_name: firstName, last_name: lastName, email });
       toast({
         title: t('profile.success'),
         description: t('profile.updateSuccess'),
@@ -65,7 +65,8 @@ const ProfileSettings = () => {
     setIsChangingPassword(true);
     
     try {
-      await updatePassword(currentPassword, newPassword);
+      // Feature not implemented yet
+      throw new Error("Changement de mot de passe non implémenté");
       toast({
         title: t('profile.success'),
         description: t('profile.passwordSuccess'),
@@ -199,14 +200,20 @@ const ProfileSettings = () => {
                     className="border-ts-forest/20 focus:border-ts-forest/50"
                   />
                 </div>
-                <Button 
-                  type="submit" 
-                  className="bg-ts-forest hover:bg-ts-forest/90 text-white"
-                  disabled={isChangingPassword}
-                >
-                  {isChangingPassword ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                  {t('profile.changePassword')}
-                </Button>
+                 <Button 
+                   type="button" 
+                   className="bg-ts-forest hover:bg-ts-forest/90 text-white"
+                   disabled={true}
+                   onClick={() => {
+                     toast({
+                       title: "Fonctionnalité non disponible",
+                       description: "Le changement de mot de passe sera disponible prochainement",
+                       variant: "default",
+                     });
+                   }}
+                 >
+                   {t('profile.changePassword')}
+                 </Button>
               </div>
             </form>
           </CardContent>

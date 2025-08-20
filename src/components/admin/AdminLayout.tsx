@@ -19,7 +19,7 @@ import { useLanguage } from "@/context/LanguageContext";
 
 const AdminLayout: React.FC = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, profile, logout } = useAuth();
   const { toast } = useToast();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
@@ -161,7 +161,7 @@ const AdminLayout: React.FC = () => {
             <div>
               {user && (
                 <span className="text-sm text-gray-500">
-                  {t.userInfo}: {user.firstName} {user.lastName} | {user.email}
+                  {t.userInfo}: {user?.email}
                 </span>
               )}
             </div>

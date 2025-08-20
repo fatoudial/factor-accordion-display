@@ -12,7 +12,7 @@ import type { Order } from "@/types/order";
 
 const OrderDetails = () => {
   const { orderId } = useParams<{ orderId: string }>();
-  const { token } = useAuth();
+  const { session } = useAuth();
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -21,10 +21,10 @@ const OrderDetails = () => {
 
   useEffect(() => {
     const fetchOrder = async () => {
-      if (!token || !orderId) return;
+      if (!session || !orderId) return;
       
       try {
-        const data = await orderApi.getOrderById(token, orderId);
+        const data = await orderApi.getOrderById(session.access_token, orderId);
         setOrder(data);
       } catch (err: any) {
         setError("Impossible de charger les détails de la commande");
@@ -35,14 +35,14 @@ const OrderDetails = () => {
     };
 
     fetchOrder();
-  }, [token, orderId]);
+  }, [session, orderId]);
 
   const handleCancelOrder = async () => {
-    if (!token || !orderId) return;
+    if (!session || !orderId) return;
     
     setIsCancelling(true);
     try {
-      const updatedOrder = await orderApi.cancelOrder(token, orderId);
+      const updatedOrder = await orderApi.cancelOrder(session.access_token, orderId);
       setOrder(updatedOrder);
     } catch (err: any) {
       setError("Impossible d'annuler la commande");
