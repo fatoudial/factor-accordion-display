@@ -8,10 +8,10 @@ const TestAccountInfo = () => {
   const { toast } = useToast();
 
   const testAccount = {
-    email: 'test@yopmail.com',
-    password: 'password123',
-    firstName: 'Test',
-    lastName: 'User'
+    email: 'admin@yopmail.com',
+    password: '123456',
+    firstName: 'Admin',
+    lastName: 'Test'
   };
 
   const copyToClipboard = (text: string, label: string) => {
@@ -64,8 +64,9 @@ const TestAccountInfo = () => {
           </div>
         </div>
         
-        <div className="text-xs text-blue-600 text-center">
-          💡 Vous pouvez aussi utiliser n'importe quel email jetable (yopmail, etc.)
+        <div className="text-xs text-blue-600 text-center space-y-1">
+          <div>💡 Vous pouvez utiliser n'importe quel email jetable (yopmail, etc.)</div>
+          <div className="font-semibold text-red-600">⚠️ Démarrez d'abord le backend Java sur le port 8080</div>
         </div>
       </CardContent>
     </Card>
