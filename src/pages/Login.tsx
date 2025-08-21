@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/context/AuthContext";
+import TestAccountInfo from "@/components/TestAccountInfo";
 
 const loginSchema = z.object({
   email: z.string().email("Veuillez entrer une adresse email valide"),
@@ -48,7 +49,9 @@ const Login = () => {
   
   return (
     <div className="container flex items-center justify-center py-16 px-4">
-      <Card className="w-full max-w-md">
+      <div className="w-full max-w-md space-y-6">
+        <TestAccountInfo />
+        <Card className="w-full">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Connexion</CardTitle>
           <CardDescription>
@@ -65,8 +68,8 @@ const Login = () => {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input 
-                        placeholder="votre@email.com" 
+                       <Input 
+                        placeholder="test@yopmail.com ou tout email" 
                         type="email" 
                         autoComplete="email"
                         disabled={isSubmitting}
@@ -125,7 +128,8 @@ const Login = () => {
             </Link>
           </p>
         </CardFooter>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 };

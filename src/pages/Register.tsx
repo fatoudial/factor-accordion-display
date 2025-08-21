@@ -10,6 +10,7 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
+import TestAccountInfo from "@/components/TestAccountInfo";
 
 const Register = () => {
   const [firstName, setFirstName] = useState("");
@@ -51,7 +52,7 @@ const Register = () => {
       });
       
       setTimeout(() => {
-        navigate("/login");
+        navigate("/dashboard");
       }, 2000);
     } catch (err: any) {
       setError(err.message || t('auth.registerError'));
@@ -62,7 +63,9 @@ const Register = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-ts-sand/50 px-4">
-      <Card className="w-full max-w-md shadow-lg border-ts-gold/20 hover:border-ts-gold/30 transition-all">
+      <div className="w-full max-w-md space-y-6">
+        <TestAccountInfo />
+        <Card className="w-full shadow-lg border-ts-gold/20 hover:border-ts-gold/30 transition-all">
         <CardHeader className="bg-ts-forest/5 rounded-t-lg">
           <CardTitle className="text-2xl font-bold text-ts-forest">{t('auth.register')}</CardTitle>
           <CardDescription className="text-gray-600">
@@ -108,7 +111,7 @@ const Register = () => {
               <Input
                 id="email"
                 type="email"
-                placeholder="votre@email.com"
+                placeholder="test@yopmail.com ou tout email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -157,7 +160,8 @@ const Register = () => {
             </Link>
           </div>
         </CardFooter>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 };
