@@ -85,6 +85,7 @@ const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             <Link to="/" className="text-ts-indigo hover:text-ts-gold transition-colors">{t('nav.home')}</Link>
+            <Link to="/chat-book" className="text-ts-indigo hover:text-ts-gold transition-colors">Créer un livre</Link>
             <Link to="/offers" className="text-ts-indigo hover:text-ts-gold transition-colors">{t('nav.offers')}</Link>
             <Link to="/process" className="text-ts-indigo hover:text-ts-gold transition-colors">{t('nav.how')}</Link>
             <Link to="/about" className="text-ts-indigo hover:text-ts-gold transition-colors">À propos</Link>
@@ -227,6 +228,7 @@ const Navbar = () => {
             onMouseEnter={handleMouseEnter}
           >
             <Link to="/" className="block text-ts-indigo hover:text-ts-gold transition-colors py-2">{t('nav.home')}</Link>
+            <Link to="/chat-book" className="block text-ts-indigo hover:text-ts-gold transition-colors py-2">Créer un livre</Link>
             <Link to="/offers" className="block text-ts-indigo hover:text-ts-gold transition-colors py-2">{t('nav.offers')}</Link>
             <Link to="/process" className="block text-ts-indigo hover:text-ts-gold transition-colors py-2">{t('nav.how')}</Link>
             <Link to="/about" className="block text-ts-indigo hover:text-ts-gold transition-colors py-2">À propos</Link>

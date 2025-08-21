@@ -54,7 +54,7 @@ import ResetPassword from "./pages/ResetPassword";
 import InstagramBookInterface from "./components/InstagramBookInterface";
 import FacebookBookInterface from "./components/FacebookInterface";
 import WhatsAppBookInterface from "./components/WhatsAppBookInterface";
-import TestAuth from "./pages/TestAuth";
+import ChatBookCreator from "./pages/ChatBookCreator";
 import BackendTestPayment from "./pages/BackendTestPayment";
 
 const queryClient = new QueryClient();
@@ -95,7 +95,7 @@ const App = () => (
                 <Route path="/terms-of-service" element={<TermsOfService />} />
                 <Route path="/extractor" element={<ExtractorTool />} />
                 <Route path="/mock-orders" element={<MockOrders />} />
-                <Route path="/test-auth" element={<TestAuth />} />
+                <Route path="/chat-book" element={<ChatBookCreator />} />
                 <Route path="/test-backend-payment" element={<BackendTestPayment />} />
 
                 {/* Routes temporairement publiques - authentification désactivée */}

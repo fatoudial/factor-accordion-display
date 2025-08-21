@@ -8,10 +8,10 @@ const TestAccountInfo = () => {
   const { toast } = useToast();
 
   const testAccount = {
-    email: 'admin@yopmail.com',
-    password: '123456',
-    firstName: 'Admin',
-    lastName: 'Test'
+    email: 'mbodjfaticha99@gmail.com',
+    password: 'passer',
+    firstName: 'Fatou',
+    lastName: 'Mbodj'
   };
 
   const copyToClipboard = (text: string, label: string) => {
