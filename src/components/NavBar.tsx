@@ -22,7 +22,7 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const { user, profile, isAuthenticated, isAdmin, logout } = useAuth();
+  const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const { items } = useCart();
   const itemsCount = items ? items.length : 0;
   const navigate = useNavigate();
@@ -235,7 +235,7 @@ const Navbar = () => {
             {isAuthenticated ? (
               <>
                 <div className="py-2 text-ts-indigo">
-                  <p className="font-medium">{profile?.first_name} {profile?.last_name}</p>
+                  <p className="font-medium">{user?.firstName} {user?.lastName}</p>
                   <p className="text-sm text-gray-500">{user?.email}</p>
                 </div>
                 {isAdmin ? (

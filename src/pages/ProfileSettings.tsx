@@ -12,12 +12,12 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/LanguageContext";
 
 const ProfileSettings = () => {
-  const { user, profile, updateProfile, isLoading } = useAuth();
+  const { user, updateProfile, isLoading } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
   
-  const [firstName, setFirstName] = useState(profile?.first_name || "");
-  const [lastName, setLastName] = useState(profile?.last_name || "");
+  const [firstName, setFirstName] = useState(user?.firstName || "");
+  const [lastName, setLastName] = useState(user?.lastName || "");
   const [email, setEmail] = useState(user?.email || "");
   
   const [currentPassword, setCurrentPassword] = useState("");
@@ -32,7 +32,7 @@ const ProfileSettings = () => {
     setIsUpdating(true);
     
     try {
-      await updateProfile({ first_name: firstName, last_name: lastName, email });
+      await updateProfile({ firstName: firstName, lastName: lastName, email });
       toast({
         title: t('profile.success'),
         description: t('profile.updateSuccess'),

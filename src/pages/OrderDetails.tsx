@@ -12,7 +12,7 @@ import type { Order } from "@/types/order";
 
 const OrderDetails = () => {
   const { orderId } = useParams<{ orderId: string }>();
-  const { session } = useAuth();
+  const { user } = useAuth();
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -21,10 +21,10 @@ const OrderDetails = () => {
 
   useEffect(() => {
     const fetchOrder = async () => {
-      if (!session || !orderId) return;
+      if (!user || !orderId) return;
       
       try {
-        const data = await orderApi.getOrderById(session.access_token, orderId);
+        const data = await orderApi.getOrderById(localStorage.getItem('token') || '', orderId);
         setOrder(data);
       } catch (err: any) {
         setError("Impossible de charger les détails de la commande");
@@ -35,14 +35,14 @@ const OrderDetails = () => {
     };
 
     fetchOrder();
-  }, [session, orderId]);
+  }, [user, orderId]);
 
   const handleCancelOrder = async () => {
-    if (!session || !orderId) return;
+    if (!user || !orderId) return;
     
     setIsCancelling(true);
     try {
-      const updatedOrder = await orderApi.cancelOrder(session.access_token, orderId);
+      const updatedOrder = await orderApi.cancelOrder(localStorage.getItem('token') || '', orderId);
       setOrder(updatedOrder);
     } catch (err: any) {
       setError("Impossible d'annuler la commande");

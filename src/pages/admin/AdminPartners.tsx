@@ -23,7 +23,7 @@ interface Partner {
 }
 
 const AdminPartners = () => {
-  const { session } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   const [partners, setPartners] = useState<Partner[]>([]);
   const [filteredPartners, setFilteredPartners] = useState<Partner[]>([]);

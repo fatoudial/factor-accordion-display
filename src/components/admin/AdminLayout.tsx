@@ -19,7 +19,7 @@ import { useLanguage } from "@/context/LanguageContext";
 
 const AdminLayout: React.FC = () => {
   const navigate = useNavigate();
-  const { user, profile, logout } = useAuth();
+  const { user, logout } = useAuth();
   const { toast } = useToast();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);

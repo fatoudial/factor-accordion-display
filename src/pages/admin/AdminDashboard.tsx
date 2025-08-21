@@ -13,7 +13,7 @@ import DashboardStats from "@/components/admin/DashboardStats";
 import RecentOrdersList from "@/components/admin/RecentOrdersList";
 
 const AdminDashboard = () => {
-  const { session } = useAuth();
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   
@@ -37,12 +37,12 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!session) return;
+      if (!user) return;
       
       setIsLoading(true);
       try {
         // Charger les commandes
-        const ordersData = await orderApi.getAllOrders(session.access_token);
+        const ordersData = await orderApi.getAllOrders(localStorage.getItem('token') || '');
         setOrders(ordersData);
         
         // Filtrer les commandes récentes (7 derniers jours)
@@ -97,7 +97,7 @@ const AdminDashboard = () => {
     };
     
     fetchData();
-  }, [session]);
+  }, [user]);
 
   if (isLoading) {
     return (
