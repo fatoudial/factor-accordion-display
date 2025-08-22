@@ -58,12 +58,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     try {
       setIsLoading(true);
+      
+      // Simulation de connexion sans backend pour mbodjfaticha@gmail.com
+      if (email === 'mbodjfaticha@gmail.com') {
+        const mockUser: User = {
+          id: '1',
+          email: 'mbodjfaticha@gmail.com',
+          firstName: 'Fatou',
+          lastName: 'Mbodj',
+          role: 'USER'
+        };
+        setUser(mockUser);
+        toast({
+          title: "Connexion réussie",
+          description: `Bienvenue ${mockUser.firstName}!`,
+        });
+        return;
+      }
+      
+      // Pour les autres utilisateurs, utiliser le backend
       const response = await backendAuthService.login({ email, password });
       if (response.success) {
         setUser(response.user);
       }
     } catch (error: any) {
       console.error('Login error:', error);
+      toast({
+        title: "Erreur de connexion",
+        description: "Email ou mot de passe incorrect",
+        variant: "destructive",
+      });
       throw error;
     } finally {
       setIsLoading(false);
