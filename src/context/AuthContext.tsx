@@ -59,13 +59,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setIsLoading(true);
       
-      // Simulation de connexion sans backend pour mbodjfaticha@gmail.com
-      if (email === 'mbodjfaticha@gmail.com') {
+      // Simulation de connexion sans backend
+      if (email === 'mbodjfaticha99@gmail.com' && password === 'passer') {
         const mockUser: User = {
           id: '1',
-          email: 'mbodjfaticha@gmail.com',
+          email: 'mbodjfaticha99@gmail.com',
           firstName: 'Fatou',
           lastName: 'Mbodj',
+          role: 'ADMIN'
+        };
+        setUser(mockUser);
+        toast({
+          title: "Connexion réussie",
+          description: `Bienvenue ${mockUser.firstName} (Admin)!`,
+        });
+        return;
+      }
+      
+      if (email === 'fatou@yopmail.com' && password === 'passer') {
+        const mockUser: User = {
+          id: '2',
+          email: 'fatou@yopmail.com',
+          firstName: 'Fatou',
+          lastName: 'User',
           role: 'USER'
         };
         setUser(mockUser);
