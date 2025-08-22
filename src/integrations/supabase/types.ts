@@ -14,6 +14,232 @@ export type Database = {
   }
   public: {
     Tables: {
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean | null
+          message: string
+          order_id: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message: string
+          order_id?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          order_id?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_items: {
+        Row: {
+          created_at: string
+          id: string
+          order_id: string
+          product_id: string | null
+          quantity: number
+          total_price: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_id: string
+          product_id?: string | null
+          quantity?: number
+          total_price: number
+          unit_price: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_id?: string
+          product_id?: string | null
+          quantity?: number
+          total_price?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          book_data: Json | null
+          book_format: string
+          book_title: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          order_reference: string
+          payment_method: string | null
+          payment_provider: string | null
+          shipping_address: Json
+          status: string
+          total_amount: number
+          transaction_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          book_data?: Json | null
+          book_format: string
+          book_title?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          order_reference: string
+          payment_method?: string | null
+          payment_provider?: string | null
+          shipping_address: Json
+          status?: string
+          total_amount: number
+          transaction_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          book_data?: Json | null
+          book_format?: string
+          book_title?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          order_reference?: string
+          payment_method?: string | null
+          payment_provider?: string | null
+          shipping_address?: Json
+          status?: string
+          total_amount?: number
+          transaction_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          order_id: string
+          payment_method: string
+          phone_number: string | null
+          provider_response: Json | null
+          provider_transaction_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          order_id: string
+          payment_method: string
+          phone_number?: string | null
+          provider_response?: Json | null
+          provider_transaction_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          order_id?: string
+          payment_method?: string
+          phone_number?: string | null
+          provider_response?: Json | null
+          provider_transaction_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          cover_style: string | null
+          created_at: string
+          description: string | null
+          format: string
+          id: string
+          is_active: boolean | null
+          pages: number | null
+          price: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          cover_style?: string | null
+          created_at?: string
+          description?: string | null
+          format: string
+          id?: string
+          is_active?: boolean | null
+          pages?: number | null
+          price: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          cover_style?: string | null
+          created_at?: string
+          description?: string | null
+          format?: string
+          id?: string
+          is_active?: boolean | null
+          pages?: number | null
+          price?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -52,7 +278,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_order_reference: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

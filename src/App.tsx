@@ -18,6 +18,7 @@ import Dashboard from "./pages/Dashboard";
 import ProfileSettings from "./pages/ProfileSettings";
 import OrderDetails from "./pages/OrderDetails";
 import UserOrders from "./pages/UserOrders";
+import CompleteCheckout from "./pages/CompleteCheckout";
 import Checkout from "./pages/Checkout";
 import Cart from "./pages/Cart";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -81,7 +82,8 @@ const App = () => (
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/contact" element={<ContactForm />} />
                 <Route path="/process" element={<ProcessPage />} />
-                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/checkout" element={<CompleteCheckout />} />
+                <Route path="/complete-checkout" element={<CompleteCheckout />} />
                 <Route path="/designer" element={<BookDesigner />} />
                 <Route path="/designer/upload" element={<FileUploaderPage />} />
                 <Route path="/designer/book" element={<BookDesignerPage />} />

@@ -237,7 +237,7 @@ const Navbar = () => {
             {isAuthenticated ? (
               <>
                 <div className="py-2 text-ts-indigo">
-                  <p className="font-medium">{user?.firstName} {user?.lastName}</p>
+                  <p className="font-medium">{user?.email}</p>
                   <p className="text-sm text-gray-500">{user?.email}</p>
                 </div>
                 {isAdmin ? (
