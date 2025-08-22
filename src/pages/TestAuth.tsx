@@ -16,7 +16,7 @@ const TestAuth = () => {
     
     try {
       // Test basic Supabase connection
-      const { data, error } = await supabase.from('profiles').select('count').limit(1);
+      const { data, error } = await supabase.from('profiles').select('id').limit(1);
       
       if (error) {
         setStatus(`Connection error: ${error.message}`);
