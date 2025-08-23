@@ -11,11 +11,12 @@ export interface CartItem {
   price: number;
   quantity: number;
   imageUrl?: string;
+  description?: string;
 }
 
 interface CartContextType {
   items: CartItem[];
-  addItem: (item: Omit<CartItem, 'id' | 'quantity'>) => void;
+  addItem: (item: Partial<CartItem>) => void;
   updateQuantity: (id: string, quantity: number) => void;
   removeItem: (id: string) => void;
   clearCart: () => void;
@@ -71,12 +72,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('cart', JSON.stringify(items));
   }, [items]);
 
-  const addItem = (item: Omit<CartItem, 'id' | 'quantity'>) => {
-    // Générer un ID unique
-    const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  const addItem = (item: Partial<CartItem>) => {
+    // Utiliser l'ID fourni ou générer un ID unique
+    const id = item.id || `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
-    // Calculer le prix en fonction du format
-    const price = formatPrice(item.format);
+    // Calculer le prix en fonction du format ou utiliser celui fourni
+    const price = item.price || (item.format ? formatPrice(item.format) : 15000);
     
     setItems(prevItems => {
       // Vérifier si un article similaire existe déjà
@@ -91,7 +92,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return newItems;
       } else {
         // Sinon, ajouter un nouvel article
-        return [...prevItems, { ...item, id, price, quantity: 1 }];
+        return [...prevItems, { 
+          id, 
+          title: item.title || 'Article', 
+          format: item.format || 'PRINT_STANDARD',
+          price, 
+          quantity: 1,
+          imageUrl: item.imageUrl,
+          description: item.description
+        }];
       }
     });
 

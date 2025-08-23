@@ -21,6 +21,7 @@ import UserOrders from "./pages/UserOrders";
 import CompleteCheckout from "./pages/CompleteCheckout";
 import Checkout from "./pages/Checkout";
 import Cart from "./pages/Cart";
+import Products from "./pages/Products";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminOrders from "./pages/admin/AdminOrders";
 import AdminUsers from "./pages/admin/AdminUsers";
@@ -79,7 +80,8 @@ const App = () => (
         <Route path="/register" element={<Register />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/cart" element={<Cart />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/products" element={<Products />} />
                 <Route path="/contact" element={<ContactForm />} />
                 <Route path="/process" element={<ProcessPage />} />
                 <Route path="/checkout" element={<CompleteCheckout />} />
