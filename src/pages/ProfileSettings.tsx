@@ -12,12 +12,12 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/LanguageContext";
 
 const ProfileSettings = () => {
-  const { user, updateProfile, isLoading } = useAuth();
+  const { user, userProfile, updateProfile, isLoading } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
   
-  const [firstName, setFirstName] = useState(user?.firstName || "");
-  const [lastName, setLastName] = useState(user?.lastName || "");
+  const [firstName, setFirstName] = useState(userProfile?.first_name || "");
+  const [lastName, setLastName] = useState(userProfile?.last_name || "");
   const [email, setEmail] = useState(user?.email || "");
   
   const [currentPassword, setCurrentPassword] = useState("");
