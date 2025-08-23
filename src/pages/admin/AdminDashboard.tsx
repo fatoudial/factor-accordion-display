@@ -3,7 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { adminService, formatPrice, getStatusLabel } from '@/lib/supabaseServices';
+import { adminService, getStatusLabel } from '@/lib/adminServices';
+import { formatPrice } from '@/lib/supabaseServices';
 import { useAuth } from '@/context/AuthContext';
 import { Navigate, Link } from 'react-router-dom';
 import { Loader2, ShoppingBag, Users, CreditCard, TrendingUp, Eye, Package } from 'lucide-react';
@@ -33,8 +34,13 @@ const AdminDashboard = () => {
       setIsLoading(true);
       
       // Charger les statistiques
-      const statsData = await adminService.getOrderStats();
-      setStats(statsData);
+      const statsData = await adminService.getDashboardStats();
+      setStats({
+        total_orders: statsData.totalOrders,
+        pending_orders: statsData.pendingOrders,
+        completed_orders: statsData.completedOrders,
+        total_revenue: statsData.totalRevenue
+      });
 
       // Charger les commandes récentes
       const ordersData = await adminService.getAllOrders();

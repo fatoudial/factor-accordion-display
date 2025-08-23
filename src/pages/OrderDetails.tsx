@@ -25,7 +25,11 @@ const OrderDetails = () => {
       
       try {
         const data = await orderApi.getOrderById(localStorage.getItem('token') || '', orderId);
-        setOrder(data);
+        if (data) {
+          setOrder(data);
+        } else {
+          setError("Commande non trouvée");
+        }
       } catch (err: any) {
         setError("Impossible de charger les détails de la commande");
         console.error(err);
@@ -43,7 +47,9 @@ const OrderDetails = () => {
     setIsCancelling(true);
     try {
       const updatedOrder = await orderApi.cancelOrder(localStorage.getItem('token') || '', orderId);
-      setOrder(updatedOrder);
+      if (updatedOrder) {
+        setOrder(updatedOrder);
+      }
     } catch (err: any) {
       setError("Impossible d'annuler la commande");
       console.error(err);

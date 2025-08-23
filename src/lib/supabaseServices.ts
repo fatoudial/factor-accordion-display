@@ -44,7 +44,8 @@ export const orderService = {
         shipping_address: orderData.shipping_address,
         book_format: orderData.book_format,
         book_title: orderData.book_title,
-        book_data: { items: orderData.items }
+        book_data: { items: orderData.items },
+        order_reference: `CMD-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
       })
       .select()
       .single();
@@ -125,7 +126,29 @@ export const orderService = {
     const { data, error } = await query;
     if (error) throw error;
 
-    return data || [];
+    // Transform data to match Order interface
+    return (data || []).map(order => ({
+      id: order.id,
+      orderReference: order.order_reference,
+      userId: order.user_id,
+      items: order.order_items?.map((item: any) => ({
+        id: item.id,
+        productId: item.product_id || '',
+        name: order.book_title || 'Livre Souvenir',
+        quantity: item.quantity,
+        unitPrice: item.unit_price,
+        bookFormat: order.book_format
+      })) || [],
+      totalAmount: order.total_amount,
+      status: order.status as any,
+      shippingAddress: order.shipping_address as any,
+      paymentMethod: order.payment_method || '',
+      paymentId: order.payments?.[0]?.id,
+      createdAt: order.created_at,
+      updatedAt: order.updated_at,
+      bookFormat: order.book_format,
+      bookId: order.id
+    }));
   },
 
   // Récupérer les commandes d'un utilisateur
@@ -155,7 +178,30 @@ export const orderService = {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    
+    // Transform data to match Order interface
+    return (data || []).map(order => ({
+      id: order.id,
+      orderReference: order.order_reference,
+      userId: order.user_id,
+      items: order.order_items?.map((item: any) => ({
+        id: item.id,
+        productId: item.product_id || '',
+        name: order.book_title || 'Livre Souvenir',
+        quantity: item.quantity,
+        unitPrice: item.unit_price,
+        bookFormat: order.book_format
+      })) || [],
+      totalAmount: order.total_amount,
+      status: order.status as any,
+      shippingAddress: order.shipping_address as any,
+      paymentMethod: order.payment_method || '',
+      paymentId: order.payments?.[0]?.id,
+      createdAt: order.created_at,
+      updatedAt: order.updated_at,
+      bookFormat: order.book_format,
+      bookId: order.id
+    }));
   },
 
   // Récupérer une commande par ID
@@ -183,7 +229,32 @@ export const orderService = {
       .single();
 
     if (error) throw error;
-    return data;
+    
+    if (!data) return null;
+    
+    // Transform data to match Order interface
+    return {
+      id: data.id,
+      orderReference: data.order_reference,
+      userId: data.user_id,
+      items: data.order_items?.map((item: any) => ({
+        id: item.id,
+        productId: item.product_id || '',
+        name: data.book_title || 'Livre Souvenir',
+        quantity: item.quantity,
+        unitPrice: item.unit_price,
+        bookFormat: data.book_format
+      })) || [],
+      totalAmount: data.total_amount,
+      status: data.status as any,
+      shippingAddress: data.shipping_address as any,
+      paymentMethod: data.payment_method || '',
+      paymentId: data.payments?.[0]?.id,
+      createdAt: data.created_at,
+      updatedAt: data.updated_at,
+      bookFormat: data.book_format,
+      bookId: data.id
+    };
   },
 
   // Mettre à jour le statut d'une commande

@@ -18,7 +18,8 @@ export const orderApi = {
   
   // Récupérer une commande par ID
   getOrderById: async (token: string, orderId: string) => {
-    return await orderService.getOrderById(orderId);
+    const result = await orderService.getOrderById(orderId);
+    return result;
   },
   
   // Mettre à jour le statut d'une commande
@@ -43,7 +44,25 @@ export const orderApi = {
       throw new Error("Cette commande ne peut plus être annulée");
     }
     
-    return await orderService.updateOrderStatus(orderId, "CANCELLED");
+    const updatedOrder = await orderService.updateOrderStatus(orderId, "CANCELLED");
+    // Transform the updated order to match the Order interface
+    if (updatedOrder) {
+      return {
+        id: updatedOrder.id,
+        orderReference: updatedOrder.order_reference,
+        userId: updatedOrder.user_id,
+        items: [],
+        totalAmount: updatedOrder.total_amount,
+        status: updatedOrder.status as any,
+        shippingAddress: updatedOrder.shipping_address as any,
+        paymentMethod: updatedOrder.payment_method || '',
+        createdAt: updatedOrder.created_at,
+        updatedAt: updatedOrder.updated_at,
+        bookFormat: updatedOrder.book_format,
+        bookId: updatedOrder.id
+      };
+    }
+    return null;
   },
 
   // Obtenir des statistiques pour l'admin
