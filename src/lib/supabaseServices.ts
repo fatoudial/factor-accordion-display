@@ -1,87 +1,21 @@
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 
-// Types pour les services
-export interface Product {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  format: string;
-  pages: number;
-  cover_style: string;
-  is_active: boolean;
-}
+// Types from Supabase
+type Order = Database['public']['Tables']['orders']['Row'];
+type OrderInsert = Database['public']['Tables']['orders']['Insert'];
+type OrderUpdate = Database['public']['Tables']['orders']['Update'];
+type Product = Database['public']['Tables']['products']['Row'];
+type Payment = Database['public']['Tables']['payments']['Row'];
 
-export interface Order {
-  id: string;
-  user_id: string;
-  order_reference: string;
-  status: string;
-  book_format: string;
-  book_title?: string;
-  total_amount: number;
-  payment_method?: string;
-  payment_provider?: string;
-  transaction_id?: string;
-  shipping_address: any;
-  book_data?: any;
-  notes?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Payment {
-  id: string;
-  order_id: string;
-  payment_method: string;
-  provider_transaction_id?: string;
-  amount: number;
-  status: string;
-  provider_response?: any;
-  phone_number?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Notification {
-  id: string;
-  user_id: string;
-  type: string;
-  title: string;
-  message: string;
-  is_read: boolean;
-  order_id?: string;
-  created_at: string;
-}
-
-// Service des produits
-export const productService = {
-  async getProducts(): Promise<Product[]> {
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .eq('is_active', true)
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-    return data || [];
-  },
-
-  async getProduct(id: string): Promise<Product | null> {
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .eq('id', id)
-      .eq('is_active', true)
-      .single();
-
-    if (error) throw error;
-    return data;
-  }
+// Formatage des prix
+export const formatPrice = (amount: number): string => {
+  return `${amount.toLocaleString()} FCFA`;
 };
 
-// Service des commandes
+// Service de gestion des commandes
 export const orderService = {
+  // Créer une nouvelle commande
   async createOrder(orderData: {
     items: Array<{
       product_id: string;
@@ -89,198 +23,369 @@ export const orderService = {
       unit_price: number;
     }>;
     shipping_address: any;
-    book_data?: any;
-    book_title?: string;
     book_format: string;
-  }): Promise<Order> {
-    const { data, error } = await supabase.functions.invoke('create-order', {
-      body: orderData
-    });
+    book_title: string;
+  }) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Utilisateur non authentifié');
 
-    if (error) throw error;
-    if (!data.success) throw new Error(data.error || 'Failed to create order');
-    
-    return data.order;
+    const total_amount = orderData.items.reduce(
+      (sum, item) => sum + (item.unit_price * item.quantity), 
+      0
+    );
+
+    // Créer la commande principale
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .insert({
+        user_id: user.id,
+        total_amount,
+        status: 'PENDING_PAYMENT',
+        shipping_address: orderData.shipping_address,
+        book_format: orderData.book_format,
+        book_title: orderData.book_title,
+        book_data: { items: orderData.items }
+      })
+      .select()
+      .single();
+
+    if (orderError) throw orderError;
+
+    // Créer les éléments de commande
+    for (const item of orderData.items) {
+      const { error: itemError } = await supabase
+        .from('order_items')
+        .insert({
+          order_id: order.id,
+          product_id: item.product_id,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          total_price: item.unit_price * item.quantity
+        });
+
+      if (itemError) console.error('Erreur lors de la création des éléments:', itemError);
+    }
+
+    return order;
   },
 
-  async getUserOrders(): Promise<Order[]> {
+  // Récupérer toutes les commandes (pour admin)
+  async getAllOrders(filters?: {
+    status?: string;
+    search?: string;
+    dateFrom?: Date;
+    dateTo?: Date;
+    bookFormat?: string;
+    paymentMethod?: string;
+  }) {
+    let query = supabase
+      .from('orders')
+      .select(`
+        *,
+        order_items (
+          id,
+          quantity,
+          unit_price,
+          total_price,
+          product_id
+        ),
+        payments (
+          id,
+          payment_method,
+          status,
+          amount
+        )
+      `)
+      .order('created_at', { ascending: false });
+
+    if (filters?.status) {
+      query = query.eq('status', filters.status);
+    }
+
+    if (filters?.search) {
+      query = query.or(`order_reference.ilike.%${filters.search}%`);
+    }
+
+    if (filters?.dateFrom) {
+      query = query.gte('created_at', filters.dateFrom.toISOString());
+    }
+
+    if (filters?.dateTo) {
+      query = query.lte('created_at', filters.dateTo.toISOString());
+    }
+
+    if (filters?.bookFormat) {
+      query = query.eq('book_format', filters.bookFormat);
+    }
+
+    if (filters?.paymentMethod) {
+      query = query.eq('payment_method', filters.paymentMethod);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+
+    return data || [];
+  },
+
+  // Récupérer les commandes d'un utilisateur
+  async getUserOrders() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Utilisateur non authentifié');
+
     const { data, error } = await supabase
       .from('orders')
-      .select('*')
+      .select(`
+        *,
+        order_items (
+          id,
+          quantity,
+          unit_price,
+          total_price,
+          product_id
+        ),
+        payments (
+          id,
+          payment_method,
+          status,
+          amount
+        )
+      `)
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
     return data || [];
   },
 
-  async getOrder(id: string): Promise<Order | null> {
+  // Récupérer une commande par ID
+  async getOrderById(orderId: string) {
     const { data, error } = await supabase
       .from('orders')
-      .select('*')
-      .eq('id', id)
+      .select(`
+        *,
+        order_items (
+          id,
+          quantity,
+          unit_price,
+          total_price,
+          product_id
+        ),
+        payments (
+          id,
+          payment_method,
+          status,
+          amount,
+          provider_response
+        )
+      `)
+      .eq('id', orderId)
       .single();
 
     if (error) throw error;
     return data;
   },
 
-  async updateOrderStatus(id: string, status: string): Promise<void> {
-    const { error } = await supabase
+  // Mettre à jour le statut d'une commande
+  async updateOrderStatus(orderId: string, status: string) {
+    const { data, error } = await supabase
       .from('orders')
-      .update({ status })
-      .eq('id', id);
-
-    if (error) throw error;
-  }
-};
-
-// Service des paiements
-export const paymentService = {
-  async processPayment(paymentData: {
-    order_id: string;
-    payment_method: 'orange_money' | 'wave' | 'credit_card';
-    phone_number?: string;
-    card_details?: {
-      number: string;
-      expiry: string;
-      cvc: string;
-      name: string;
-    };
-  }): Promise<{
-    success: boolean;
-    transaction_id?: string;
-    message: string;
-    payment_id: string;
-  }> {
-    const { data, error } = await supabase.functions.invoke('process-payment', {
-      body: paymentData
-    });
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('id', orderId)
+      .select()
+      .single();
 
     if (error) throw error;
     return data;
   },
 
-  async getPaymentsByOrder(orderId: string): Promise<Payment[]> {
-    const { data, error } = await supabase
-      .from('payments')
-      .select('*')
-      .eq('order_id', orderId)
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-    return data || [];
-  }
-};
-
-// Service des notifications
-export const notificationService = {
-  async getUserNotifications(): Promise<Notification[]> {
-    const { data, error } = await supabase
-      .from('notifications')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(50);
-
-    if (error) throw error;
-    return data || [];
-  },
-
-  async markAsRead(id: string): Promise<void> {
-    const { error } = await supabase
-      .from('notifications')
-      .update({ is_read: true })
-      .eq('id', id);
-
-    if (error) throw error;
-  },
-
-  async markAllAsRead(): Promise<void> {
-    const { error } = await supabase
-      .from('notifications')
-      .update({ is_read: true })
-      .eq('is_read', false);
-
-    if (error) throw error;
-  }
-};
-
-// Service admin
-export const adminService = {
-  async getAllOrders(): Promise<Order[]> {
-    const { data, error } = await supabase
+  // Obtenir les statistiques pour le dashboard admin
+  async getDashboardStats() {
+    // Total des commandes
+    const { count: totalOrders } = await supabase
       .from('orders')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .select('*', { count: 'exact', head: true });
 
-    if (error) throw error;
-    return data || [];
-  },
-
-  async getAllPayments(): Promise<Payment[]> {
-    const { data, error } = await supabase
-      .from('payments')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-    return data || [];
-  },
-
-  async getOrderStats(): Promise<{
-    total_orders: number;
-    pending_orders: number;
-    completed_orders: number;
-    total_revenue: number;
-  }> {
-    const { data: orders, error } = await supabase
+    // Commandes en attente
+    const { count: pendingOrders } = await supabase
       .from('orders')
-      .select('status, total_amount');
+      .select('*', { count: 'exact', head: true })
+      .in('status', ['PENDING_PAYMENT', 'PAID', 'PROCESSING']);
 
-    if (error) throw error;
+    // Commandes livrées
+    const { count: completedOrders } = await supabase
+      .from('orders')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'DELIVERED');
 
-    const stats = {
-      total_orders: orders?.length || 0,
-      pending_orders: orders?.filter(o => ['PENDING_PAYMENT', 'PAID', 'PROCESSING'].includes(o.status)).length || 0,
-      completed_orders: orders?.filter(o => ['DELIVERED'].includes(o.status)).length || 0,
-      total_revenue: orders?.filter(o => o.status !== 'CANCELLED').reduce((sum, o) => sum + (o.total_amount || 0), 0) || 0
+    // Revenus totaux
+    const { data: revenueData } = await supabase
+      .from('orders')
+      .select('total_amount')
+      .eq('status', 'DELIVERED');
+
+    const totalRevenue = revenueData?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0;
+
+    return {
+      totalOrders: totalOrders || 0,
+      pendingOrders: pendingOrders || 0,
+      completedOrders: completedOrders || 0,
+      totalRevenue
     };
-
-    return stats;
   }
 };
 
-// Utilitaires
-export const formatPrice = (priceInCents: number): string => {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'XOF',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(priceInCents / 100);
+// Service de gestion des paiements
+export const paymentService = {
+  // Traiter un paiement
+  async processPayment(paymentData: {
+    order_id: string;
+    payment_method: string;
+    phone_number?: string;
+    card_details?: any;
+  }) {
+    try {
+      // Simuler le traitement du paiement (remplacer par vraie intégration)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Créer l'enregistrement de paiement
+      const { data: order } = await supabase
+        .from('orders')
+        .select('total_amount')
+        .eq('id', paymentData.order_id)
+        .single();
+
+      if (!order) throw new Error('Commande non trouvée');
+
+      const { data: payment, error: paymentError } = await supabase
+        .from('payments')
+        .insert({
+          order_id: paymentData.order_id,
+          amount: order.total_amount,
+          payment_method: paymentData.payment_method.toUpperCase(),
+          phone_number: paymentData.phone_number,
+          status: 'COMPLETED'
+        })
+        .select()
+        .single();
+
+      if (paymentError) throw paymentError;
+
+      // Mettre à jour le statut de la commande
+      await supabase
+        .from('orders')
+        .update({ 
+          status: 'PAID',
+          payment_method: paymentData.payment_method.toUpperCase()
+        })
+        .eq('id', paymentData.order_id);
+
+      return { success: true, payment };
+    } catch (error: any) {
+      console.error('Erreur de paiement:', error);
+      return { 
+        success: false, 
+        message: error.message || 'Erreur lors du traitement du paiement' 
+      };
+    }
+  },
+
+  // Récupérer l'historique des paiements
+  async getPaymentHistory() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Utilisateur non authentifié');
+
+    const { data, error } = await supabase
+      .from('payments')
+      .select(`
+        *,
+        orders!inner (
+          user_id,
+          order_reference,
+          book_title
+        )
+      `)
+      .eq('orders.user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  }
 };
 
-export const getStatusColor = (status: string): string => {
-  const colors: Record<string, string> = {
-    'PENDING_PAYMENT': 'text-yellow-600',
-    'PAID': 'text-blue-600',
-    'PROCESSING': 'text-orange-600',
-    'SHIPPED': 'text-purple-600',
-    'DELIVERED': 'text-green-600',
-    'CANCELLED': 'text-red-600',
-    'REFUNDED': 'text-gray-600'
-  };
-  return colors[status] || 'text-gray-600';
+// Service de gestion des produits
+export const productService = {
+  // Récupérer tous les produits actifs
+  async getProducts() {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  },
+
+  // Créer un nouveau produit (admin uniquement)
+  async createProduct(productData: {
+    title: string;
+    description?: string;
+    price: number;
+    format: string;
+    pages?: number;
+    cover_style?: string;
+  }) {
+    const { data, error } = await supabase
+      .from('products')
+      .insert(productData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
 };
 
-export const getStatusLabel = (status: string): string => {
-  const labels: Record<string, string> = {
-    'PENDING_PAYMENT': 'En attente de paiement',
-    'PAID': 'Payé',
-    'PROCESSING': 'En préparation',
-    'SHIPPED': 'Expédié',
-    'DELIVERED': 'Livré',
-    'CANCELLED': 'Annulé',
-    'REFUNDED': 'Remboursé'
-  };
-  return labels[status] || status;
+// Service de notifications
+export const notificationService = {
+  // Créer une notification
+  async createNotification(data: {
+    user_id: string;
+    title: string;
+    message: string;
+    type: string;
+    order_id?: string;
+  }) {
+    const { error } = await supabase
+      .from('notifications')
+      .insert(data);
+
+    if (error) throw error;
+  },
+
+  // Récupérer les notifications d'un utilisateur
+  async getUserNotifications() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Utilisateur non authentifié');
+
+    const { data, error } = await supabase
+      .from('notifications')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  },
+
+  // Marquer une notification comme lue
+  async markAsRead(notificationId: string) {
+    const { error } = await supabase
+      .from('notifications')
+      .update({ is_read: true })
+      .eq('id', notificationId);
+
+    if (error) throw error;
+  }
 };

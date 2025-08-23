@@ -1,62 +1,39 @@
 
-import type { Order, OrderStatus, OrdersFilters } from '@/types/order';
-import { mockApi, type AdminFilters } from './mockBackend';
+import { orderService } from './supabaseServices';
 
-// Définir l'API pour les commandes avec mocks améliorés
+// API pour les commandes utilisant Supabase
 export const orderApi = {
-  // Récupérer toutes les commandes (admin) avec filtres étendus
-  getAllOrders: async (token: string, filters?: OrdersFilters & {
+  // Récupérer toutes les commandes (admin) avec filtres
+  getAllOrders: async (token: string, filters?: {
+    status?: string;
+    search?: string;
+    dateFrom?: Date;
+    dateTo?: Date;
     bookFormat?: string;
     paymentMethod?: string;
-    dateRange?: { from: Date; to: Date };
-  }): Promise<Order[]> => {
+  }) => {
     console.log('Fetching orders with filters:', filters);
-    
-    // Convertir les filtres vers le format du mock backend
-    const mockFilters: AdminFilters = {};
-    
-    if (filters?.status) mockFilters.status = filters.status;
-    if (filters?.search) mockFilters.search = filters.search;
-    if (filters?.dateFrom && filters?.dateTo) {
-      mockFilters.dateRange = { from: filters.dateFrom, to: filters.dateTo };
-    }
-    if (filters?.dateRange) {
-      mockFilters.dateRange = filters.dateRange;
-    }
-    if (filters?.bookFormat) mockFilters.bookFormat = filters.bookFormat;
-    if (filters?.paymentMethod) mockFilters.paymentMethod = filters.paymentMethod;
-    
-    return await mockApi.orders.getAll(mockFilters);
+    return await orderService.getAllOrders(filters);
   },
   
   // Récupérer une commande par ID
-  getOrderById: async (token: string, orderId: string): Promise<Order> => {
-    const order = await mockApi.orders.getById(orderId);
-    if (!order) {
-      throw new Error("Commande non trouvée");
-    }
-    return order;
+  getOrderById: async (token: string, orderId: string) => {
+    return await orderService.getOrderById(orderId);
   },
   
   // Mettre à jour le statut d'une commande
-  updateOrderStatus: async (token: string, orderId: string, status: OrderStatus): Promise<Order> => {
-    const updatedOrder = await mockApi.orders.updateStatus(orderId, status);
-    if (!updatedOrder) {
-      throw new Error("Commande non trouvée");
-    }
-    return updatedOrder;
+  updateOrderStatus: async (token: string, orderId: string, status: string) => {
+    return await orderService.updateOrderStatus(orderId, status);
   },
   
   // Récupérer les commandes d'un utilisateur
-  getUserOrders: async (token: string): Promise<Order[]> => {
-    // Pour la démo, retourner quelques commandes aléatoires
-    const allOrders = await mockApi.orders.getAll();
-    return allOrders.slice(0, 3);
+  getUserOrders: async (token: string) => {
+    return await orderService.getUserOrders();
   },
   
   // Annuler une commande
-  cancelOrder: async (token: string, orderId: string): Promise<Order> => {
-    const order = await mockApi.orders.getById(orderId);
+  cancelOrder: async (token: string, orderId: string) => {
+    const order = await orderService.getOrderById(orderId);
     if (!order) {
       throw new Error("Commande non trouvée");
     }
@@ -66,12 +43,12 @@ export const orderApi = {
       throw new Error("Cette commande ne peut plus être annulée");
     }
     
-    return await mockApi.orders.updateStatus(orderId, "CANCELLED");
+    return await orderService.updateOrderStatus(orderId, "CANCELLED");
   },
 
   // Obtenir des statistiques pour l'admin
   getDashboardStats: async (token: string) => {
-    return await mockApi.dashboard.getStats();
+    return await orderService.getDashboardStats();
   }
 };
 

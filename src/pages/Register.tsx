@@ -42,7 +42,7 @@ const Register = () => {
     setIsSubmitting(true);
 
     try {
-      await register(email, password, firstName, lastName);
+      await register(email, password, { firstName, lastName });
       
       toast({
         title: t('auth.success'),

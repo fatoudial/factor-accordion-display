@@ -41,24 +41,24 @@ const OfferCard = ({
 
     // Attendre un peu avant de rediriger pour que l'utilisateur voie le prix
     setTimeout(() => {
+      // Ajouter l'article au panier avec les bonnes informations
+      const cartItem = {
+        title: `Livre ${title}`,
+        format: bookFormat,
+        price: parseInt(price.replace(/\s/g, '')), // Convertir le prix string en number
+        imageUrl: '/covers/book-cover-1.png'
+      };
+
+      // Pour les tests, on ajoute directement au panier et on redirige vers checkout
+      // Dans une vraie application, on utiliserait le context du panier
+      localStorage.setItem('tempCartItem', JSON.stringify(cartItem));
+      
       if (isAuthenticated) {
-        // Rediriger directement vers checkout avec les informations nécessaires
-        navigate('/checkout', { 
-          state: { 
-            bookId: bookId || Date.now(), // Générer un ID temporaire si pas fourni
-            bookFormat: bookFormat,
-            price: price,
-            fromOffers: true
-          } 
-        });
+        navigate('/checkout');
       } else {
-        // Rediriger vers la page de connexion avec redirection vers checkout
         navigate('/login', { 
           state: { 
-            redirectAfterLogin: '/checkout',
-            selectedOffer: bookFormat,
-            bookId: bookId || Date.now(),
-            price: price
+            redirectAfterLogin: '/checkout'
           } 
         });
       }

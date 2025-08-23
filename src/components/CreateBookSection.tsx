@@ -14,11 +14,12 @@ const CreateBookSection = () => {
   const { isAuthenticated } = useAuth();
 
   const handlePlatformSelect = (platform: string) => {
-    if (isAuthenticated) {
+    // Temporairement sans vérification d'authentification
+    // if (isAuthenticated) {
       navigate('/designer', { state: { selectedPlatform: platform } });
-    } else {
-      navigate('/login', { state: { redirectAfterLogin: '/designer', selectedPlatform: platform } });
-    }
+    // } else {
+    //   navigate('/login', { state: { redirectAfterLogin: '/designer', selectedPlatform: platform } });
+    // }
   };
 
   const platforms = [

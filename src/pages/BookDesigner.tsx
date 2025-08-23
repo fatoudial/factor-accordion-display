@@ -14,16 +14,16 @@ const BookDesigner = () => {
   const { isAuthenticated } = useAuth();
   const [currentView, setCurrentView] = useState<'platforms' | 'instagram' | 'facebook'| 'whatsApp'>('platforms');
   
-  // Redirect if the user is not authenticated
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login', { 
-        state: { 
-          redirectAfterLogin: '/designer',
-        } 
-      });
-    }
-  }, [isAuthenticated, navigate]);
+  // Redirect if the user is not authenticated - Temporairement désactivé pour les tests
+  // useEffect(() => {
+  //   if (!isAuthenticated) {
+  //     navigate('/login', { 
+  //       state: { 
+  //         redirectAfterLogin: '/designer',
+  //       } 
+  //     });
+  //   }
+  // }, [isAuthenticated, navigate]);
 
   const handlePlatformSelect = (platform: string) => {
     if (platform === 'instagram') {

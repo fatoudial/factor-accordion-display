@@ -12,12 +12,12 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/LanguageContext";
 
 const ProfileSettings = () => {
-  const { user, userProfile, updateProfile, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
   
-  const [firstName, setFirstName] = useState(userProfile?.first_name || "");
-  const [lastName, setLastName] = useState(userProfile?.last_name || "");
+  const [firstName, setFirstName] = useState(user?.user_metadata?.first_name || "");
+  const [lastName, setLastName] = useState(user?.user_metadata?.last_name || "");
   const [email, setEmail] = useState(user?.email || "");
   
   const [currentPassword, setCurrentPassword] = useState("");
@@ -32,7 +32,9 @@ const ProfileSettings = () => {
     setIsUpdating(true);
     
     try {
-      await updateProfile({ firstName: firstName, lastName: lastName, email });
+      // Fonctionnalité de mise à jour du profil non implémentée
+      throw new Error("Mise à jour du profil non implémentée");
+      
       toast({
         title: t('profile.success'),
         description: t('profile.updateSuccess'),
@@ -42,7 +44,7 @@ const ProfileSettings = () => {
     } catch (error) {
       toast({
         title: t('profile.error'),
-        description: t('profile.updateError'),
+        description: "La mise à jour du profil sera disponible prochainement",
         variant: "destructive"
       });
     } finally {
@@ -147,11 +149,17 @@ const ProfileSettings = () => {
                   />
                 </div>
                 <Button 
-                  type="submit" 
+                  type="button" 
                   className="bg-ts-forest hover:bg-ts-forest/90 text-white" 
-                  disabled={isUpdating}
+                  disabled={true}
+                  onClick={() => {
+                    toast({
+                      title: "Fonctionnalité non disponible",
+                      description: "La mise à jour du profil sera disponible prochainement",
+                      variant: "default",
+                    });
+                  }}
                 >
-                  {isUpdating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                   {t('profile.save')}
                 </Button>
               </div>

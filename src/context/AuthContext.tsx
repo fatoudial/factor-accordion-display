@@ -7,15 +7,13 @@ import { useToast } from '@/components/ui/use-toast';
 interface AuthContextType {
   user: User | null;
   session: Session | null;
-  userProfile: any;
   isAuthenticated: boolean;
   isAdmin: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<{ error?: string }>;
-  register: (email: string, password: string, firstName?: string, lastName?: string) => Promise<{ error?: string }>;
+  register: (email: string, password: string, userData?: any) => Promise<{ error?: string }>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error?: string }>;
-  updateProfile: (data: { firstName?: string; lastName?: string; email?: string }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -129,7 +127,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const register = async (email: string, password: string, firstName?: string, lastName?: string) => {
+  const register = async (email: string, password: string, userData?: any) => {
     try {
       setIsLoading(true);
 
@@ -139,8 +137,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         options: {
           emailRedirectTo: `${window.location.origin}/`,
           data: {
-            first_name: firstName || '',
-            last_name: lastName || '',
+            first_name: userData?.firstName || '',
+            last_name: userData?.lastName || '',
           }
         }
       });
@@ -207,35 +205,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const updateProfile = async (data: { firstName?: string; lastName?: string; email?: string }) => {
-    if (!user) throw new Error('No user logged in');
-    
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          first_name: data.firstName,
-          last_name: data.lastName,
-          email: data.email
-        })
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-      
-      // Reload profile
-      await loadUserProfile(user.id);
-    } catch (error: any) {
-      throw new Error(error.message || 'Failed to update profile');
-    }
-  };
-
   const isAuthenticated = !!user && !!session;
   const isAdmin = userProfile?.role === 'admin';
 
   const value = {
     user,
     session,
-    userProfile,
     isAuthenticated,
     isAdmin,
     isLoading,
@@ -243,7 +218,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     register,
     logout,
     resetPassword,
-    updateProfile,
   };
 
   return (
