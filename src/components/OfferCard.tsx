@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from '@/components/ui/badge';
 import { Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
+import { useCart } from '@/context/CartContext';
 import { BookFormat } from '@/types/book';
 
 interface OfferCardProps {
@@ -32,7 +32,7 @@ const OfferCard = ({
   fromPreview = false 
 }: OfferCardProps) => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { addItem } = useCart();
   const [showPrice, setShowPrice] = useState(false);
 
   const handleActionClick = () => {
@@ -41,7 +41,7 @@ const OfferCard = ({
 
     // Attendre un peu avant de rediriger pour que l'utilisateur voie le prix
     setTimeout(() => {
-      // Ajouter l'article au panier avec les bonnes informations
+      // Ajouter l'article au panier
       const cartItem = {
         title: `Livre ${title}`,
         format: bookFormat,
@@ -49,19 +49,10 @@ const OfferCard = ({
         imageUrl: '/covers/book-cover-1.png'
       };
 
-      // Pour les tests, on ajoute directement au panier et on redirige vers checkout
-      // Dans une vraie application, on utiliserait le context du panier
-      localStorage.setItem('tempCartItem', JSON.stringify(cartItem));
+      addItem(cartItem);
       
-      if (isAuthenticated) {
-        navigate('/checkout');
-      } else {
-        navigate('/login', { 
-          state: { 
-            redirectAfterLogin: '/checkout'
-          } 
-        });
-      }
+      // Rediriger vers le panier au lieu du checkout
+      navigate('/cart');
     }, 1500);
   };
   
